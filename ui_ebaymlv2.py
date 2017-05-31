@@ -11,8 +11,6 @@ import pickle
 from xml.dom.minidom import parse
 import sys
 import webbrowser
-import numpy
-import gensim
 datastore = {}
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
