@@ -65,10 +65,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addLayout
         self.iterate = QtGui.QPushButton(self.centralwidget)
         self.iterate.setObjectName(_fromUtf8("iterate"))
-        self.verticalLayout.addWidget(self.iterate)
-        self.trainword = QtGui.QPushButton(self.centralwidget)
-        self.trainword.setObjectName(_fromUtf8("Train Words"))
-        self.verticalLayout.addWidget(self.trainword)
+        
         self.line = QtGui.QFrame(self.centralwidget)
         self.line.setFrameShape(QtGui.QFrame.HLine)
         self.line.setFrameShadow(QtGui.QFrame.Sunken)
@@ -76,23 +73,15 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.line)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
-        self.acceptableprice = QtGui.QLineEdit(self.centralwidget)
-        self.acceptableprice.setObjectName(_fromUtf8("acceptableprice"))
-        self.horizontalLayout_3.addWidget(self.acceptableprice)
         self.search = QtGui.QPushButton(self.centralwidget)
         self.search.setObjectName(_fromUtf8("search"))
         self.horizontalLayout_3.addWidget(self.search)
+        self.horizontalLayout_3.addWidget(self.iterate)
         self.back = QtGui.QPushButton(self.centralwidget)
         self.back.setObjectName(_fromUtf8("back"))
         self.horizontalLayout_3.addWidget(self.back)
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem1)
-        self.interested = QtGui.QPushButton(self.centralwidget)
-        self.interested.setObjectName(_fromUtf8("interested"))
-        self.horizontalLayout_3.addWidget(self.interested)
-        self.notinterested = QtGui.QPushButton(self.centralwidget)
-        self.notinterested.setObjectName(_fromUtf8("notinterested"))
-        self.horizontalLayout_3.addWidget(self.notinterested)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -108,21 +97,14 @@ class Ui_MainWindow(object):
         
         QtCore.QObject.connect(self.back, QtCore.SIGNAL("clicked()"), self.backfunc)
         QtCore.QObject.connect(self.search, QtCore.SIGNAL("clicked()"), self.makesearch)
-        QtCore.QObject.connect(self.interested, QtCore.SIGNAL("clicked()"), self.classintfunc)
-        QtCore.QObject.connect(self.notinterested, QtCore.SIGNAL("clicked()"), self.classnotintfunc)
         QtCore.QObject.connect(self.iterate, QtCore.SIGNAL("clicked()"), self.iteratefunc)
-        QtCore.QObject.connect(self.trainword, QtCore.SIGNAL("clicked()"), self.word2vec)
         self.retranslateUi(MainWindow)
         
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
         self.search.setText(_translate("MainWindow", "Search", None))
-        self.iterate.setText(_translate("MainWindow", "Iterate", None))
-        self.trainword.setText(_translate("MainWindow", "Word2Vec", None))
-        self.interested.setText(_translate("MainWindow", "Interested", None))
-        self.notinterested.setText(_translate("MainWindow", "Not Interested", None))
-        self.menuFile.setTitle(_translate("MainWindow", "File", None))
+        self.iterate.setText(_translate("MainWindow", "Next", None))
         self.back.setText(_translate("MainWindow", "Back", None))
     def add(self):
         row = self.listWidget.currentRow()
@@ -197,74 +179,21 @@ class Ui_MainWindow(object):
         search = self.listWidget.currentItem().text()
         self.buttonClicked(search, x)
     def backfunc(self):
-        global x
-        x-=1
-        global search
-        self.buttonClicked(search, x)
-    def classintfunc(self):
-        global x
-        x+=1
-        search = self.listWidget.currentItem().text()
-        self.classint(search, x)
-    def classnotintfunc(self):
-        global x
-        x+=1
-        search = self.listWidget.currentItem().text()
-        self.classnotint(search, x)
+        self.y = self.listWidget.currentRow() 
+        self.y-=1
+        self.listWidget.setCurrentRow(self.y)
+        self.makesearch()
     def buttonClicked(self,search, x):
         print(x)
         ThreadClass.datascrape(ThreadClass, search, x)
-        self.openBrowser(itemURL)
-    def classint(self,search, x):
-        accprice = self.acceptableprice.text()
-        ThreadClass.datastore(ThreadClass, itemData, [1,0], accprice)
-        self.findNewListing()
-        ThreadClass.datascrape(ThreadClass, search, x)
-        self.openBrowser(itemURL)        
-    def classnotint(self, search, x):
-        ThreadClass.datastore(ThreadClass, itemData, [0,1], 0)
-        self.findNewListing()
-        ThreadClass.datascrape(ThreadClass, search, x)
-        self.openBrowser(itemURL)
+        self.openBrowser("http://www.ebay.com/sch/i.html?_nkw=" + search.replace(" ", "%20") + "&_oac=1")
     def openBrowser(self, itemURL):
         webbrowser.open(itemURL, new=0, autoraise=True)
-    def findNewListing(self):
-        global x
-        print(x)
-        try:
-            itemId = items[x].getElementsByTagName("itemId")[0].firstChild.data
-            while itemId in itemData:
-                x+=1
-                itemId = items[x].getElementsByTagName("itemId")[0].firstChild.data
-        except:
-            print("No more items")
     def iteratefunc(self):
         self.y = self.listWidget.currentRow() 
         self.y+=1
         self.listWidget.setCurrentRow(self.y)
         self.makesearch()
-    def word2vecfunc(self):
-        self.word2vec()
-        
-    def word2vec(self):
-        dbfile ="./Data/ebaydata.pk1"
-        dbstore = open(dbfile, 'rb')
-        datadump = pickle.load(dbstore)
-        dbstore.close()
-        words = []
-        for k, v in datadump.items():
-            split = v[0].split()
-            words.append(split)
-        firstsent = words[0]
-        bigram = gensim.models.phrases.Phrases(words)
-        print(bigram[firstsent])
-        model = gensim.models.Word2Vec(bigram[words], min_count = 5, size = 20, alpha = .025, iter = 5, hs=1, negative = 0)
-        print(model)
-        print(model.score(["i7 4770".split()]))
-        print(model[search])
-        print(model.most_similar(search))
-        
-
 class ThreadClass(QtCore.QThread):
     def __init__(self):
         super(ThreadClass, self).__init__()
