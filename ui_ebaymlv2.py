@@ -186,7 +186,7 @@ class Ui_MainWindow(object):
     def buttonClicked(self,search, x):
         print(x)
         ThreadClass.datascrape(ThreadClass, search, x)
-        self.openBrowser("http://www.ebay.com/sch/i.html?_nkw=" + search.replace(" ", "%20") + "&_oac=1")
+        self.openBrowser("http://www.ebay.com/sch/i.html?_nkw=" + search.replace(" ", "%20") + "&_oac=1&_sop=15")
     def openBrowser(self, itemURL):
         webbrowser.open(itemURL, new=0, autoraise=True)
     def iteratefunc(self):
